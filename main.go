@@ -44,7 +44,7 @@ func serveWs(pool *websocket.Pool, w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		// Validate & identify node
+		// TODO: Validate & identify node
 		nodeId = command.NodeId
 
 		// If command is GetTime - ONLY FIRST TIME

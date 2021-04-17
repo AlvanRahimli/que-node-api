@@ -55,18 +55,20 @@ func (pool *Pool) Start() {
 			pool.Clients[client] = true
 			log.Infof("New Node Connected with ID: %s", client.ID)
 			log.Infof("Size of Connection Pool: %d", len(pool.Clients))
+			// TODO: Send message to activate node
 			break
 		case client := <-pool.Unregister:
 			delete(pool.Clients, client)
 			log.Infof("Node Disconnected with ID: %s", client.ID)
 			log.Infof("Size of Connection Pool: %d", len(pool.Clients))
+			// TODO: Send message to deactivate node
 			break
 		case message := <-pool.Send:
 			messageJson, err := json.Marshal(message.Content)
 			if err != nil {
 				log.Errorf("Could not parse message for NodeId: %s\n\t%s", message.NodeId, err.Error())
 			}
-			log.Debugf("Pool received message %s from NodeId: %s", messageJson, message.NodeId)
+			log.Debugf("Pool received message %s", messageJson)
 
 			// Handling commands:
 			switch message.Content.Command {
@@ -89,23 +91,23 @@ func (pool *Pool) Start() {
 				case "lastPerson":
 					number, err := strconv.Atoi(parsed[1])
 					if err != nil {
-						log.Printf("Could not parse given number for NodeId: %s \n\t%s", message.NodeId, err.Error())
+						log.Errorf("Could not parse given number for NodeId: %s \n\t%s", message.NodeId, err.Error())
 					}
 					err = message.RelatedClient.handleLastPerson(number)
 					if err != nil {
-						log.Printf("Could not handle lastPerson request for NodeId: %s\n\t%s", message.NodeId, err.Error())
+						log.Errorf("Could not handle lastPerson request for NodeId: %s\n\t%s", message.NodeId, err.Error())
 					}
 					break
 				case "validOtp":
 					err := message.RelatedClient.handleValidOtp(dbContext, parsed[1])
 					if err != nil {
-						log.Printf("Could not handle validOtp request for NodeId: %s\n\t%s", message.NodeId, err.Error())
+						log.Errorf("Could not handle validOtp request for NodeId: %s\n\t%s", message.NodeId, err.Error())
 					}
 					break
 				case "expiredOtp":
 					err := message.RelatedClient.handleExpiredOtp(dbContext, parsed[1])
 					if err != nil {
-						log.Printf("Could not handle expiredOtp request for NodeId %s\n\t%s", message.NodeId, err.Error())
+						log.Errorf("Could not handle expiredOtp request for NodeId %s\n\t%s", message.NodeId, err.Error())
 					}
 					break
 				}
